@@ -94,6 +94,55 @@ models:
   stacking_regressor:
     final_estimator: "ridge"
 
+  # Deep Learning Models - LSTM/RNN
+  lstm:
+    sequence_length: 60  # Number of time steps to look back
+    prediction_horizon: 1  # Number of steps ahead to predict
+    lstm_units: [128, 64, 32]  # Units for each LSTM layer
+    dropout_rate: 0.2
+    learning_rate: 0.001
+    epochs: 100
+    batch_size: 32
+    validation_split: 0.2
+    early_stopping_patience: 15
+    reduce_lr_patience: 5
+
+  gru:
+    sequence_length: 60
+    prediction_horizon: 1
+    lstm_units: [128, 64, 32]  # Note: parameter name kept for consistency
+    dropout_rate: 0.2
+    learning_rate: 0.001
+    epochs: 100
+    batch_size: 32
+
+  bidirectional_lstm:
+    sequence_length: 60
+    prediction_horizon: 1
+    lstm_units: [64, 32]  # Fewer units as bidirectional doubles them
+    dropout_rate: 0.2
+    learning_rate: 0.001
+    epochs: 100
+    batch_size: 32
+
+# Deep Learning Hyperparameter Tuning
+deep_learning_tuning:
+  tuner_type: "bayesian"  # "random", "bayesian", or "hyperband"
+  max_trials: 50
+  executions_per_trial: 1
+  directory: "tuner_results"
+  project_name: "lstm_stock_prediction"
+  search_epochs: 50
+  batch_size: 32
+
+  # Hyperparameter search space
+  search_space:
+    n_lstm_layers: [1, 4]  # min, max
+    lstm_units_range: [32, 256]  # min, max
+    dropout_range: [0.0, 0.5]
+    learning_rate_range: [1e-5, 1e-2]
+    dense_units_range: [16, 128]
+
 # Hyperparameter Tuning Configuration
 hyperparameter_tuning:
   method: "randomized"  # "grid" or "randomized"

@@ -1,6 +1,6 @@
 # Stock Price Prediction
 
-A comprehensive machine learning framework for stock price prediction using multiple regression models with proper time-series methodology, feature engineering, and evaluation metrics.
+A comprehensive machine learning framework for stock price prediction using traditional ML and deep learning models (LSTM/RNN) with proper time-series methodology, feature engineering, and dynamic hyperparameter optimization.
 
 ## Table of Contents
 
@@ -29,7 +29,8 @@ This project implements a production-ready stock price prediction system with:
 - **Proper time-series methodology** - Uses TimeSeriesSplit for cross-validation to prevent data leakage
 - **Comprehensive feature engineering** - Technical indicators (RSI, MACD, Bollinger Bands), lag features, rolling statistics
 - **Multiple ML models** - Linear Regression, SVR, Decision Trees, Random Forests, Gradient Boosting, and Ensemble methods
-- **Hyperparameter tuning** - Automated GridSearch and RandomizedSearch
+- **Deep Learning (LSTM/RNN)** - LSTM, GRU, and Bidirectional LSTM with multiple hidden layers
+- **Dynamic hyperparameter tuning** - GridSearch, RandomizedSearch, and Keras Tuner with Bayesian Optimization
 - **Advanced evaluation** - R², RMSE, MAE, MAPE, Directional Accuracy, and trading metrics
 - **Professional visualizations** - Actual vs Predicted, Residuals, Time Series plots, Feature Importance
 - **Modular architecture** - Clean, testable, and reusable code structure
@@ -51,6 +52,7 @@ This project implements a production-ready stock price prediction system with:
 - Linear: Linear Regression, Ridge, Lasso, SVR
 - Tree-based: Decision Tree, Random Forest, Gradient Boosting
 - Ensemble: Voting, Stacking, Bagging, Weighted Average
+- Deep Learning: LSTM, GRU, Bidirectional LSTM with hyperparameter tuning
 
 ✅ **Comprehensive Evaluation**
 - Regression Metrics: R², RMSE, MAE, MAPE
@@ -314,6 +316,79 @@ viz.plot_feature_importance(importance, save_name='feature_importance.png')
 - **Stacking Regressor**: Meta-learner combines base models
 - **Bagging Regressor**: Bootstrap aggregation
 - **Weighted Average**: Simple weighted combination
+
+### Deep Learning Models (RNN/LSTM)
+- **LSTM**: Long Short-Term Memory networks with multiple hidden layers
+  - Captures long-term dependencies in time series
+  - 3-layer architecture with configurable units [128, 64, 32]
+  - Dropout regularization (0.2)
+  - Early stopping and learning rate reduction
+- **GRU**: Gated Recurrent Units (faster alternative to LSTM)
+  - Simpler architecture with fewer parameters
+  - Faster training while maintaining good performance
+- **Bidirectional LSTM**: Processes sequences in both directions
+  - Captures patterns from past and future
+  - Especially effective for time series with bidirectional patterns
+- **Hyperparameter Tuning**: Dynamic optimization with Keras Tuner
+  - Bayesian Optimization for efficient search
+  - Automatic architecture search (1-4 layers, 32-256 units)
+  - Optimizer and learning rate tuning
+  - Up to 50 trials with early stopping
+
+## LSTM Quick Start
+
+```python
+from src.data.sequence_generator import SequenceGenerator
+from src.models.deep_learning_models import LSTMModel, LSTMTuner
+
+# Create sequences for LSTM
+seq_gen = SequenceGenerator(sequence_length=60)
+X_train_seq, y_train_seq, _, _, X_test_seq, y_test_seq = seq_gen.prepare_train_val_test(
+    train_df, None, test_df
+)
+
+# Train LSTM
+lstm_model = LSTMModel(
+    config=config,
+    sequence_length=60,
+    n_features=X_train_seq.shape[2],
+    lstm_units=[128, 64, 32],
+    dropout_rate=0.2
+)
+
+lstm_model.train(X_train_seq, y_train_seq, X_val_seq, y_val_seq, epochs=100)
+
+# Predict
+y_pred = lstm_model.predict(X_test_seq)
+y_pred_original = seq_gen.inverse_transform_predictions(y_pred)
+
+# Save model
+lstm_model.save_model('models/trained/lstm_best.keras')
+```
+
+### Hyperparameter Tuning Example
+
+```python
+from src.models.deep_learning_models import LSTMTuner
+
+# Initialize tuner
+tuner = LSTMTuner(
+    sequence_length=60,
+    n_features=5,
+    tuner_type='bayesian',  # 'random', 'bayesian', or 'hyperband'
+    max_trials=50
+)
+
+# Search for best hyperparameters
+tuner.search(X_train_seq, y_train_seq, X_val_seq, y_val_seq, epochs=50)
+
+# Get best model
+best_model = tuner.get_best_model()
+best_hp = tuner.get_best_hyperparameters()
+
+# Evaluate
+y_pred = best_model.predict(X_test_seq)
+```
 
 ## Configuration
 
