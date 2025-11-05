@@ -1,0 +1,165 @@
+# Stock Price Prediction Configuration
+
+# Data Configuration
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  train_file: "Uniqlo - Training.csv"
+  test_file: "Uniqlo - Testing.csv"
+  date_column: "Date"
+  target_column: "Close"
+  feature_columns:
+    - "Open"
+    - "High"
+    - "Low"
+    - "Volume"
+    - "Stock Trading"
+
+# Feature Engineering Configuration
+features:
+  technical_indicators:
+    sma_windows: [5, 10, 20]  # Simple Moving Average windows
+    ema_windows: [5, 10, 20]  # Exponential Moving Average windows
+    rsi_window: 14  # Relative Strength Index
+    macd:
+      fast: 12
+      slow: 26
+      signal: 9
+    bollinger_bands:
+      window: 20
+      num_std: 2
+  lag_features:
+    lags: [1, 2, 3, 5, 10]  # Number of days to lag
+  rolling_stats:
+    windows: [5, 10, 20]
+    stats: ["mean", "std", "min", "max"]
+
+# Model Configuration
+models:
+  random_seed: 42
+
+  # Linear Regression
+  linear_regression:
+    fit_intercept: true
+    normalize: false
+
+  # Support Vector Regression
+  svr:
+    kernel: "rbf"
+    C: 100
+    epsilon: 0.01
+    gamma: "scale"
+
+  # Decision Tree Regressor
+  decision_tree:
+    criterion: "absolute_error"
+    max_depth: 6
+    min_samples_split: 2
+    min_samples_leaf: 1
+    random_state: 42
+
+  # Random Forest Regressor
+  random_forest:
+    n_estimators: 100
+    criterion: "absolute_error"
+    max_depth: 10
+    min_samples_split: 2
+    min_samples_leaf: 1
+    n_jobs: -1
+    random_state: 42
+
+  # Gradient Boosting
+  gradient_boosting:
+    n_estimators: 100
+    learning_rate: 0.1
+    max_depth: 5
+    min_samples_split: 2
+    min_samples_leaf: 1
+    subsample: 0.8
+    random_state: 42
+
+  # XGBoost (if available)
+  xgboost:
+    n_estimators: 100
+    learning_rate: 0.1
+    max_depth: 5
+    subsample: 0.8
+    colsample_bytree: 0.8
+    random_state: 42
+
+  # Ensemble Methods
+  voting_regressor:
+    voting: "soft"
+
+  stacking_regressor:
+    final_estimator: "ridge"
+
+# Hyperparameter Tuning Configuration
+hyperparameter_tuning:
+  method: "randomized"  # "grid" or "randomized"
+  cv_folds: 5
+  n_iter: 50  # for randomized search
+  scoring: "neg_mean_squared_error"
+  random_state: 42
+
+  # Parameter grids for each model
+  svr_param_grid:
+    svr__C: [1, 10, 100, 1000]
+    svr__epsilon: [0.001, 0.01, 0.1, 1]
+    svr__gamma: ["scale", "auto"]
+
+  decision_tree_param_grid:
+    max_depth: [3, 5, 7, 10, 15]
+    min_samples_split: [2, 5, 10]
+    min_samples_leaf: [1, 2, 4]
+
+  random_forest_param_grid:
+    n_estimators: [50, 100, 200]
+    max_depth: [5, 10, 15, 20]
+    min_samples_split: [2, 5, 10]
+    min_samples_leaf: [1, 2, 4]
+
+# Cross-Validation Configuration
+cross_validation:
+  method: "TimeSeriesSplit"  # or "KFold"
+  n_splits: 5
+  test_size: 0.2
+  validation_size: 0.1
+
+# Evaluation Metrics
+evaluation:
+  metrics:
+    - "r2_score"
+    - "mean_squared_error"
+    - "root_mean_squared_error"
+    - "mean_absolute_error"
+    - "mean_absolute_percentage_error"
+    - "directional_accuracy"
+
+  plot_types:
+    - "actual_vs_predicted"
+    - "residuals"
+    - "error_distribution"
+    - "time_series"
+    - "feature_importance"
+
+# Visualization Configuration
+visualization:
+  figure_size: [10, 6]
+  dpi: 100
+  style: "seaborn-v0_8"
+  palette: "Set2"
+  save_plots: true
+  plot_dir: "reports/figures"
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/stock_prediction.log"
+
+# Model Persistence
+model_persistence:
+  save_dir: "models/trained"
+  save_format: "joblib"  # "joblib" or "pickle"
+  save_best_only: true
